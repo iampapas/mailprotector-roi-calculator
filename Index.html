@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mailprotector — Email Security ROI Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #112040;
+    --teal: #00c9a7;
+    --teal-dim: #00a88a;
+    --teal-glow: rgba(0,201,167,0.13);
+    --sky: #4fb8d4;
+    --white: #f0f6fc;
+    --muted: #7a9ab5;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --red: #ff6b6b;
+    --gold: #f0c060;
+    --mp-green: #00c9a7;
+  }
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: ‘DM Sans’, sans-serif;
+background: var(–navy);
+color: var(–white);
+min-height: 100vh;
+}
+
+body::before {
+content: ‘’;
+position: fixed; inset: 0;
+background:
+radial-gradient(ellipse 80% 50% at 15% -5%, rgba(0,201,167,0.11) 0%, transparent 55%),
+radial-gradient(ellipse 50% 40% at 90% 85%, rgba(79,184,212,0.07) 0%, transparent 50%);
+pointer-events: none; z-index: 0;
+}
+
+/* ── TOP NAV BAR ── */
+.topbar {
+position: relative; z-index: 10;
+background: rgba(10,22,40,0.92);
+border-bottom: 1px solid var(–border);
+backdrop-filter: blur(12px);
+padding: 14px 32px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.logo {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+/* MP Shield SVG logo mark */
+.logo-icon {
+width: 34px; height: 34px;
+}
+
+.logo-text {
+font-family: ‘DM Sans’, sans-serif;
+font-weight: 600;
+font-size: 17px;
+letter-spacing: -0.01em;
+color: var(–white);
+}
+
+.logo-text span { color: var(–teal); }
+
+.topbar-right {
+font-size: 11px;
+color: var(–muted);
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+/* ── PAGE ── */
+.wrapper {
+position: relative; z-index: 1;
+max-width: 980px;
+margin: 0 auto;
+padding: 44px 24px 80px;
+}
+
+header { text-align: center; margin-bottom: 52px; }
+
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+font-size: 11px;
+font-weight: 600;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(–teal);
+background: var(–teal-glow);
+border: 1px solid rgba(0,201,167,0.28);
+padding: 5px 14px 5px 10px;
+border-radius: 100px;
+margin-bottom: 22px;
+}
+
+.badge-dot {
+width: 6px; height: 6px;
+border-radius: 50%;
+background: var(–teal);
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0%,100% { opacity: 1; transform: scale(1); }
+50%      { opacity: 0.5; transform: scale(0.8); }
+}
+
+h1 {
+font-family: ‘DM Serif Display’, serif;
+font-size: clamp(2rem, 4.5vw, 3rem);
+line-height: 1.1;
+margin-bottom: 16px;
+}
+
+h1 em { font-style: italic; color: var(–teal); }
+
+header p {
+font-size: 1rem;
+color: var(–muted);
+font-weight: 300;
+max-width: 480px;
+margin: 0 auto;
+line-height: 1.65;
+}
+
+/* ── GRID ── */
+.grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+}
+@media(max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+/* ── CARDS ── */
+.card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 26px;
+backdrop-filter: blur(6px);
+animation: fadeUp 0.45s ease both;
+}
+.card:nth-child(2) { animation-delay: 0.07s; }
+
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(18px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-label {
+font-size: 10px;
+font-weight: 600;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(–teal);
+margin-bottom: 18px;
+display: flex;
+align-items: center;
+gap: 7px;
+}
+.card-label::before {
+content: ‘’;
+width: 5px; height: 5px;
+border-radius: 50%;
+background: var(–teal);
+}
+
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+
+label {
+display: block;
+font-size: 11.5px;
+font-weight: 500;
+color: var(–muted);
+margin-bottom: 7px;
+letter-spacing: 0.01em;
+}
+
+input[type=number], select {
+width: 100%;
+background: rgba(255,255,255,0.055);
+border: 1px solid var(–border);
+border-radius: 9px;
+color: var(–white);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14.5px;
+font-weight: 500;
+padding: 10px 14px;
+outline: none;
+transition: border-color 0.18s, background 0.18s;
+-moz-appearance: textfield;
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type=number]:focus, select:focus {
+border-color: rgba(0,201,167,0.6);
+background: rgba(0,201,167,0.05);
+}
+select option { background: #112040; }
+
+/* sliders */
+.slider-row { display: flex; align-items: center; gap: 10px; }
+input[type=range] {
+flex: 1;
+-webkit-appearance: none;
+height: 3px;
+border-radius: 2px;
+background: rgba(255,255,255,0.1);
+outline: none;
+cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 16px; height: 16px;
+border-radius: 50%;
+background: var(–teal);
+box-shadow: 0 0 0 3px rgba(0,201,167,0.2);
+transition: transform 0.15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.sliderval {
+font-size: 12px;
+font-weight: 600;
+color: var(–teal);
+min-width: 30px;
+text-align: right;
+}
+
+hr.divider {
+border: none;
+border-top: 1px solid var(–border);
+margin: 12px 0 16px;
+}
+
+/* ── RESULTS ── */
+.results-card {
+grid-column: 1 / -1;
+background: linear-gradient(140deg, rgba(0,201,167,0.09) 0%, rgba(79,184,212,0.04) 100%);
+border: 1px solid rgba(0,201,167,0.22);
+border-radius: 16px;
+padding: 30px;
+animation: fadeUp 0.45s 0.14s ease both;
+}
+
+.results-heading {
+font-family: ‘DM Serif Display’, serif;
+font-size: 1.25rem;
+margin-bottom: 24px;
+}
+
+.metrics {
+display: grid;
+grid-template-columns: repeat(4,1fr);
+gap: 16px;
+margin-bottom: 24px;
+}
+@media(max-width: 580px) { .metrics { grid-template-columns: repeat(2,1fr); } }
+
+.metric {
+background: rgba(255,255,255,0.04);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 16px 14px;
+text-align: center;
+transition: transform 0.18s;
+}
+.metric:hover { transform: translateY(-2px); }
+
+.metric-lbl {
+font-size: 9.5px;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(–muted);
+margin-bottom: 7px;
+}
+
+.metric-val {
+font-family: ‘DM Serif Display’, serif;
+font-size: 1.4rem;
+line-height: 1;
+color: var(–teal);
+}
+.metric-val.red  { color: var(–red); }
+.metric-val.gold { color: var(–gold); }
+.metric-val.sky  { color: var(–sky); }
+
+.metric-sub { font-size: 10px; color: var(–muted); margin-top: 5px; }
+
+/* bars */
+.bar-row { margin-bottom: 10px; }
+.bar-meta {
+display: flex;
+justify-content: space-between;
+font-size: 11.5px;
+color: var(–muted);
+margin-bottom: 5px;
+}
+.bar-track {
+background: rgba(255,255,255,0.06);
+border-radius: 4px;
+height: 9px;
+overflow: hidden;
+}
+.bar-fill {
+height: 100%;
+border-radius: 4px;
+transition: width 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.bar-fill.cur { background: var(–red); }
+.bar-fill.mp  { background: var(–teal); }
+
+/* narrative */
+.narrative {
+background: rgba(0,0,0,0.18);
+border-left: 3px solid var(–teal);
+border-radius: 0 10px 10px 0;
+padding: 14px 18px;
+font-size: 13px;
+line-height: 1.75;
+color: var(–white);
+margin-top: 22px;
+}
+.narrative strong { color: var(–teal); }
+
+/* breakdown toggle */
+.breakdown-toggle {
+font-size: 11px;
+color: var(–teal);
+cursor: pointer;
+margin-top: 14px;
+display: inline-flex;
+align-items: center;
+gap: 4px;
+border: none;
+background: none;
+font-family: inherit;
+padding: 0;
+}
+.breakdown-toggle:hover { text-decoration: underline; }
+
+.breakdown {
+display: none;
+margin-top: 14px;
+overflow: hidden;
+}
+.breakdown.open { display: block; }
+
+.breakdown-grid {
+display: grid;
+grid-template-columns: 2fr 1fr 1fr;
+gap: 0;
+font-size: 12px;
+border: 1px solid var(–border);
+border-radius: 10px;
+overflow: hidden;
+}
+.brow {
+display: contents;
+}
+.brow > div {
+padding: 9px 14px;
+border-bottom: 1px solid var(–border);
+color: var(–muted);
+}
+.brow.head > div {
+background: rgba(255,255,255,0.04);
+color: var(–teal);
+font-weight: 600;
+font-size: 10px;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+.brow:last-child > div { border-bottom: none; }
+.brow > div:nth-child(2),
+.brow > div:nth-child(3) {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+.brow.total > div {
+color: var(–white);
+font-weight: 600;
+background: rgba(255,255,255,0.03);
+}
+
+/* CTA row */
+.cta-row {
+display: flex;
+gap: 10px;
+margin-top: 24px;
+flex-wrap: wrap;
+}
+
+button.btn {
+font-family: ‘DM Sans’, sans-serif;
+font-size: 12.5px;
+font-weight: 600;
+padding: 11px 22px;
+border-radius: 9px;
+cursor: pointer;
+border: none;
+transition: all 0.18s;
+letter-spacing: 0.01em;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.btn-primary { background: var(–teal); color: var(–navy); }
+.btn-primary:hover { background: var(–teal-dim); transform: translateY(-1px); }
+.btn-ghost {
+background: transparent;
+color: var(–muted);
+border: 1px solid var(–border);
+}
+.btn-ghost:hover { color: var(–white); border-color: rgba(255,255,255,0.18); }
+
+/* ── FOOTER ── */
+footer {
+text-align: center;
+margin-top: 48px;
+font-size: 11px;
+color: var(–muted);
+opacity: 0.45;
+line-height: 1.8;
+}
+
+footer a { color: var(–teal); opacity: 0.7; text-decoration: none; }
+footer a:hover { opacity: 1; }
+</style>
+
+</head>
+<body>
+
+<!-- TOP NAV -->
+
+<nav class="topbar">
+  <div class="logo">
+    <!-- Mailprotector-style shield icon in brand teal -->
+    <svg class="logo-icon" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17 2L4 8v9c0 7.18 5.58 13.9 13 15.93C24.42 30.9 30 24.18 30 17V8L17 2Z" fill="#00c9a7" opacity="0.15"/>
+      <path d="M17 2L4 8v9c0 7.18 5.58 13.9 13 15.93C24.42 30.9 30 24.18 30 17V8L17 2Z" stroke="#00c9a7" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M11 17l4 4 8-8" stroke="#00c9a7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="logo-text">Mail<span>protector</span></span>
+  </div>
+  <span class="topbar-right">ROI &amp; Budget Calculator</span>
+</nav>
+
+<div class="wrapper">
+
+  <header>
+    <div class="badge"><span class="badge-dot"></span>Partner Value Tool</div>
+    <h1>See the Real Cost of<br><em>Email Security</em></h1>
+    <p>Enter your current environment below. We'll show you exactly what you're spending — and what you'd save by switching to Mailprotector.</p>
+  </header>
+
+  <div class="grid">
+
+```
+<!-- CARD 1 -->
+<div class="card">
+  <div class="card-label">Current Environment</div>
+
+  <div class="field">
+    <label>Number of Mailboxes</label>
+    <input type="number" id="mailboxes" value="150" min="1" oninput="calc()">
+  </div>
+
+  <div class="field">
+    <label>Current Email Security Vendor</label>
+    <select id="vendor" onchange="vendorChange()">
+      <option value="proofpoint">Proofpoint Essentials</option>
+      <option value="mimecast">Mimecast</option>
+      <option value="barracuda">Barracuda Email Security</option>
+      <option value="microsoft">Microsoft Defender add-on</option>
+      <option value="fortimail">FortiMail</option>
+      <option value="custom">Other / Custom</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Current Monthly Cost per Mailbox ($)</label>
+    <input type="number" id="curPPM" value="6.50" step="0.25" min="0" oninput="calc()">
+  </div>
+
+  <div class="field">
+    <label>IT Hours / Month Managing Email Security</label>
+    <div class="slider-row">
+      <input type="range" id="itHours" min="1" max="40" value="8"
+        oninput="document.getElementById('itHoursV').textContent=this.value;calc()">
+      <span class="sliderval" id="itHoursV">8</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>IT Hourly Rate ($)</label>
+    <input type="number" id="itRate" value="75" min="0" oninput="calc()">
+  </div>
+</div>
+
+<!-- CARD 2 -->
+<div class="card">
+  <div class="card-label">Incident &amp; Support Profile</div>
+
+  <div class="field">
+    <label>Phishing / BEC Incidents per Year</label>
+    <div class="slider-row">
+      <input type="range" id="incidents" min="0" max="50" value="6"
+        oninput="document.getElementById('incidentsV').textContent=this.value;calc()">
+      <span class="sliderval" id="incidentsV">6</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Avg. Cost to Remediate Each Incident ($)</label>
+    <input type="number" id="remCost" value="1200" min="0" oninput="calc()">
+  </div>
+
+  <div class="field">
+    <label>Spam / False-Positive Tickets per Month</label>
+    <div class="slider-row">
+      <input type="range" id="tickets" min="0" max="100" value="20"
+        oninput="document.getElementById('ticketsV').textContent=this.value;calc()">
+      <span class="sliderval" id="ticketsV">20</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Minutes per Support Ticket</label>
+    <input type="number" id="minsPerTicket" value="15" min="1" oninput="calc()">
+  </div>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label>Mailprotector Plan</label>
+    <select id="mpPlan" onchange="calc()">
+      <option value="2.50">Bracket (Encryption) — $2.50 / mailbox / mo</option>
+      <option value="3.75" selected>CloudFilter + Bracket — $3.75 / mailbox / mo</option>
+      <option value="4.50">+ SecureStore (Archiving) — $4.50 / mailbox / mo</option>
+      <option value="5.00">Full Suite (+ XtraMail Continuity) — $5.00 / mailbox / mo</option>
+    </select>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-card">
+  <div class="results-heading">Your ROI Summary</div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-lbl">Current Annual Cost</div>
+      <div class="metric-val red" id="r-cur">—</div>
+      <div class="metric-sub">licensing + IT + incidents</div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">Mailprotector Annual</div>
+      <div class="metric-val sky" id="r-mp">—</div>
+      <div class="metric-sub">estimated fully-loaded</div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">Annual Savings</div>
+      <div class="metric-val gold" id="r-sav">—</div>
+      <div class="metric-sub">year-over-year</div>
+    </div>
+    <div class="metric">
+      <div class="metric-lbl">ROI</div>
+      <div class="metric-val" id="r-roi">—</div>
+      <div class="metric-sub">return on investment</div>
+    </div>
+  </div>
+
+  <!-- Comparison bars -->
+  <div class="bar-row">
+    <div class="bar-meta">
+      <span id="cur-vendor-lbl">Current Vendor (Annual)</span>
+      <span id="bar-cur-num">—</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill cur" id="bar-cur" style="width:100%"></div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-meta">
+      <span>Mailprotector (Annual)</span>
+      <span id="bar-mp-num">—</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill mp" id="bar-mp" style="width:0%"></div></div>
+  </div>
+
+  <!-- Narrative -->
+  <div class="narrative" id="narrative">Adjust inputs above to generate your personalized ROI summary.</div>
+
+  <!-- Breakdown toggle -->
+  <button class="breakdown-toggle" onclick="toggleBreakdown(this)">▸ Show cost breakdown</button>
+
+  <div class="breakdown" id="breakdown">
+    <div class="breakdown-grid">
+      <div class="brow head">
+        <div>Cost Category</div><div>Current</div><div>Mailprotector</div>
+      </div>
+      <div class="brow">
+        <div>Licensing (annual)</div>
+        <div id="bd-lic-cur">—</div>
+        <div id="bd-lic-mp">—</div>
+      </div>
+      <div class="brow">
+        <div>IT Management (annual)</div>
+        <div id="bd-it-cur">—</div>
+        <div id="bd-it-mp">—</div>
+      </div>
+      <div class="brow">
+        <div>Security Incidents (annual)</div>
+        <div id="bd-inc-cur">—</div>
+        <div id="bd-inc-mp">—</div>
+      </div>
+      <div class="brow">
+        <div>Support Tickets (annual)</div>
+        <div id="bd-tix-cur">—</div>
+        <div id="bd-tix-mp">—</div>
+      </div>
+      <div class="brow total">
+        <div>Total</div>
+        <div id="bd-tot-cur">—</div>
+        <div id="bd-tot-mp">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <button class="btn btn-primary" onclick="exportPDF()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6l3.5 3.5L10 6M2 11.5h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Download PDF Report
+    </button>
+    <button class="btn btn-ghost" onclick="copyLink()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V8M8 1h4m0 0v4m0-4L5.5 7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Copy Shareable Link
+    </button>
+    <button class="btn btn-ghost" onclick="resetForm()">↺ Reset</button>
+  </div>
+</div>
+```
+
+  </div><!-- /grid -->
+
+  <footer>
+    Built as a partner value tool for <a href="https://mailprotector.com" target="_blank">Mailprotector</a> · 200 N. Main Street, Suite 201, Greenville, SC 29601<br>
+    Pricing estimates are illustrative. Contact <a href="mailto:sales@mailprotector.com">sales@mailprotector.com</a> for a custom quote.
+  </footer>
+
+</div><!-- /wrapper -->
+
+<script>
+const VENDOR_PRICE = { proofpoint:6.50, mimecast:7.00, barracuda:5.50, microsoft:5.00, fortimail:4.50, custom:6.00 };
+
+function vendorChange() {
+  const v = document.getElementById('vendor').value;
+  if (v !== 'custom') document.getElementById('curPPM').value = VENDOR_PRICE[v];
+  calc();
+}
+
+function $(id) { return document.getElementById(id); }
+
+function fmt(n) { return '$' + Math.round(Math.abs(n)).toLocaleString(); }
+function fmtPct(n) { return Math.round(n) + '%'; }
+
+// Store last computed values for PDF
+let last = {};
+
+function calc() {
+  const mailboxes = +$('mailboxes').value || 0;
+  const curPPM    = +$('curPPM').value    || 0;
+  const itHours   = +$('itHours').value   || 0;
+  const itRate    = +$('itRate').value    || 0;
+  const incidents = +$('incidents').value || 0;
+  const remCost   = +$('remCost').value   || 0;
+  const tickets   = +$('tickets').value   || 0;
+  const mins      = +$('minsPerTicket').value || 0;
+  const mpPPM     = +$('mpPlan').value    || 0;
+
+  // Current costs
+  const licCur = mailboxes * curPPM * 12;
+  const itCur  = itHours * itRate * 12;
+  const incCur = incidents * remCost;
+  const tixCur = tickets * (mins/60) * itRate * 12;
+  const totCur = licCur + itCur + incCur + tixCur;
+
+  // Mailprotector: 60% IT reduction, 75% incident reduction, 80% ticket reduction
+  const licMP  = mailboxes * mpPPM * 12;
+  const itMP   = itHours * 0.40 * itRate * 12;
+  const incMP  = incidents * 0.25 * remCost;
+  const tixMP  = tickets * 0.20 * (mins/60) * itRate * 12;
+  const totMP  = licMP + itMP + incMP + tixMP;
+
+  const savings = totCur - totMP;
+  const roi     = totMP > 0 ? (savings / totMP) * 100 : 0;
+
+  last = { mailboxes, curPPM, itHours, itRate, incidents, remCost, tickets, mins, mpPPM,
+    licCur, itCur, incCur, tixCur, totCur, licMP, itMP, incMP, tixMP, totMP, savings, roi };
+
+  // Metrics
+  $('r-cur').textContent = fmt(totCur);
+  $('r-mp').textContent  = fmt(totMP);
+  $('r-sav').textContent = (savings >= 0 ? '' : '-') + fmt(savings);
+  $('r-roi').textContent = fmtPct(roi);
+  $('r-sav').className   = 'metric-val ' + (savings >= 0 ? 'gold' : 'red');
+  $('r-roi').className   = 'metric-val ' + (roi >= 0 ? '' : 'red');
+
+  // Bars
+  const maxBar = Math.max(totCur, totMP, 1);
+  $('bar-cur').style.width = (totCur / maxBar * 100) + '%';
+  $('bar-mp').style.width  = (totMP  / maxBar * 100) + '%';
+  $('bar-cur-num').textContent = fmt(totCur);
+  $('bar-mp-num').textContent  = fmt(totMP);
+
+  const vendorName = $('vendor').options[$('vendor').selectedIndex].text;
+  $('cur-vendor-lbl').textContent = vendorName + ' (Annual)';
+
+  // Breakdown table
+  $('bd-lic-cur').textContent = fmt(licCur);  $('bd-lic-mp').textContent = fmt(licMP);
+  $('bd-it-cur').textContent  = fmt(itCur);   $('bd-it-mp').textContent  = fmt(itMP);
+  $('bd-inc-cur').textContent = fmt(incCur);  $('bd-inc-mp').textContent = fmt(incMP);
+  $('bd-tix-cur').textContent = fmt(tixCur);  $('bd-tix-mp').textContent = fmt(tixMP);
+  $('bd-tot-cur').textContent = fmt(totCur);  $('bd-tot-mp').textContent = fmt(totMP);
+
+  // Narrative
+  const mpPlanName = $('mpPlan').options[$('mpPlan').selectedIndex].text.split('—')[0].trim();
+  let nar = '';
+  if (savings > 0) {
+    nar = `With <strong>${mailboxes} mailboxes</strong>, switching from <strong>${vendorName}</strong> to <strong>Mailprotector ${mpPlanName}</strong> saves an estimated <strong>${fmt(savings)}/year</strong> — a <strong>${fmtPct(roi)} ROI</strong>. This includes ~60% lower IT management overhead, 75% fewer security incidents, and 80% fewer end-user support tickets. At your current spend, the switch pays for itself in under a month.`;
+  } else {
+    nar = `Based on these inputs, costs are similar. Try adjusting IT hours or incident frequency to better reflect true TCO — hidden costs are often the largest driver.`;
+  }
+  $('narrative').innerHTML = nar;
+
+  // URL state
+  updateURL();
+}
+
+function toggleBreakdown(btn) {
+  const bd = $('breakdown');
+  bd.classList.toggle('open');
+  btn.textContent = bd.classList.contains('open') ? '▾ Hide cost breakdown' : '▸ Show cost breakdown';
+}
+
+function updateURL() {
+  const params = new URLSearchParams({
+    mb: $('mailboxes').value,
+    v:  $('vendor').value,
+    ppm: $('curPPM').value,
+    ith: $('itHours').value,
+    itr: $('itRate').value,
+    inc: $('incidents').value,
+    rc:  $('remCost').value,
+    tix: $('tickets').value,
+    mpt: $('minsPerTicket').value,
+    mp:  $('mpPlan').value
+  });
+  history.replaceState(null, '', '?' + params.toString());
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(location.search);
+  if (!p.get('mb')) return;
+  const set = (id, val) => { if (val) $(id).value = val; };
+  set('mailboxes', p.get('mb'));
+  set('vendor',    p.get('v'));
+  set('curPPM',    p.get('ppm'));
+  set('itRate',    p.get('itr'));
+  set('remCost',   p.get('rc'));
+  set('minsPerTicket', p.get('mpt'));
+  set('mpPlan',    p.get('mp'));
+  const syncRange = (id, valId, val) => {
+    if (val) { $(id).value = val; $(valId).textContent = val; }
+  };
+  syncRange('itHours',   'itHoursV',   p.get('ith'));
+  syncRange('incidents', 'incidentsV', p.get('inc'));
+  syncRange('tickets',   'ticketsV',   p.get('tix'));
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = event.target.closest('button');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Link Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  });
+}
+
+function resetForm() {
+  $('mailboxes').value = 150; $('vendor').value = 'proofpoint'; $('curPPM').value = 6.50;
+  $('itHours').value = 8; $('itHoursV').textContent = 8; $('itRate').value = 75;
+  $('incidents').value = 6; $('incidentsV').textContent = 6; $('remCost').value = 1200;
+  $('tickets').value = 20; $('ticketsV').textContent = 20; $('minsPerTicket').value = 15;
+  $('mpPlan').value = '3.75';
+  calc();
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  const W = 215.9, H = 279.4;
+  const teal = [0, 201, 167];
+  const navy = [10, 22, 40];
+  const white = [240, 246, 252];
+  const muted = [122, 154, 181];
+  const red   = [255, 107, 107];
+  const gold  = [240, 192, 96];
+  const sky   = [79, 184, 212];
+
+  const vendorName = $('vendor').options[$('vendor').selectedIndex].text;
+  const mpPlanName = $('mpPlan').options[$('mpPlan').selectedIndex].text.split('—')[0].trim();
+  const dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  // Background
+  doc.setFillColor(...navy);
+  doc.rect(0, 0, W, H, 'F');
+
+  // Teal header band
+  doc.setFillColor(...teal);
+  doc.rect(0, 0, W, 38, 'F');
+
+  // Shield icon (simplified)
+  doc.setFillColor(10, 22, 40, 0.3);
+  doc.setDrawColor(10, 22, 40);
+  doc.setLineWidth(0.5);
+
+  // Logo area
+  doc.setTextColor(10, 22, 40);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Mailprotector', 20, 16);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Email Security ROI Assessment', 20, 23);
+
+  doc.setFontSize(8);
+  doc.text('mailprotector.com', W - 20, 16, { align: 'right' });
+  doc.text(dateStr, W - 20, 22, { align: 'right' });
+
+  // Title
+  doc.setTextColor(...white);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ROI & Budget Summary', 20, 52);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...muted);
+  doc.text(`${last.mailboxes} mailboxes · ${vendorName} → Mailprotector ${mpPlanName}`, 20, 60);
+
+  // Divider
+  doc.setDrawColor(...teal);
+  doc.setLineWidth(0.4);
+  doc.line(20, 64, W - 20, 64);
+
+  // Metric boxes
+  const boxes = [
+    { label: 'Current Annual Cost', value: fmt(last.totCur), color: red },
+    { label: 'Mailprotector Annual', value: fmt(last.totMP),  color: sky },
+    { label: 'Annual Savings',       value: fmt(last.savings), color: gold },
+    { label: 'ROI',                  value: fmtPct(last.roi), color: teal },
+  ];
+
+  const bx = 20, by = 70, bw = (W - 40 - 9) / 4, bh = 26;
+  boxes.forEach((b, i) => {
+    const x = bx + i * (bw + 3);
+    doc.setFillColor(255, 255, 255, 0.04);
+    doc.setDrawColor(255, 255, 255, 0.08);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, by, bw, bh, 2, 2, 'FD');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...muted);
+    doc.text(b.label.toUpperCase(), x + bw/2, by + 8, { align: 'center' });
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...b.color);
+    doc.text(b.value, x + bw/2, by + 19, { align: 'center' });
+  });
+
+  // Cost Breakdown Table
+  const ty = 106;
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...white);
+  doc.text('Cost Breakdown', 20, ty);
+
+  // Table header
+  const th = ty + 5;
+  doc.setFillColor(...teal);
+  doc.rect(20, th, W - 40, 8, 'F');
+  doc.setTextColor(10, 22, 40);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('COST CATEGORY', 24, th + 5.5);
+  doc.text('CURRENT', 130, th + 5.5);
+  doc.text('MAILPROTECTOR', W - 24, th + 5.5, { align: 'right' });
+
+  const rows = [
+    ['Licensing (Annual)',          fmt(last.licCur), fmt(last.licMP)],
+    ['IT Management (Annual)',      fmt(last.itCur),  fmt(last.itMP)],
+    ['Security Incidents (Annual)', fmt(last.incCur), fmt(last.incMP)],
+    ['Support Tickets (Annual)',    fmt(last.tixCur), fmt(last.tixMP)],
+  ];
+
+  rows.forEach((row, i) => {
+    const ry = th + 8 + i * 9;
+    if (i % 2 === 0) {
+      doc.setFillColor(255, 255, 255, 0.03);
+      doc.rect(20, ry, W - 40, 9, 'F');
+    }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text(row[0], 24, ry + 6);
+    doc.text(row[1], 130, ry + 6);
+    doc.setTextColor(...white);
+    doc.text(row[2], W - 24, ry + 6, { align: 'right' });
+  });
+
+  // Total row
+  const totY = th + 8 + rows.length * 9;
+  doc.setFillColor(...teal);
+  doc.rect(20, totY, W - 40, 9, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(10, 22, 40);
+  doc.text('TOTAL ANNUAL COST', 24, totY + 6);
+  doc.text(fmt(last.totCur), 130, totY + 6);
+  doc.text(fmt(last.totMP), W - 24, totY + 6, { align: 'right' });
+
+  // Assumptions box
+  const asy = totY + 18;
+  doc.setFillColor(0, 201, 167, 0.08);
+  doc.setDrawColor(...teal);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(20, asy, W - 40, 28, 2, 2, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(...teal);
+  doc.text('Model Assumptions', 25, asy + 7);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...muted);
+  const assumptions = [
+    '• 60% reduction in IT management hours due to Mailprotector automation and simplified console',
+    '• 75% reduction in security incidents based on superior threat detection and zero-trust architecture',
+    '• 80% reduction in end-user spam/false-positive support tickets',
+    '• Mailprotector pricing per published partner pricing. Contact sales@mailprotector.com for a custom quote.'
+  ];
+  assumptions.forEach((a, i) => {
+    doc.text(a, 25, asy + 14 + i * 4.5);
+  });
+
+  // Narrative summary
+  const narY = asy + 36;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...white);
+  doc.text('Summary', 20, narY);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...muted);
+  const narText = `With ${last.mailboxes} mailboxes, switching from ${vendorName} to Mailprotector ${mpPlanName} delivers an estimated ${fmt(last.savings)} in annual savings — a ${fmtPct(last.roi)} ROI. This accounts for reduced licensing costs, lower IT overhead, fewer security incidents, and dramatically fewer support tickets. Mailprotector's channel-exclusive pricing and Partner Centered Thinking model means MSPs spend less time managing email security and more time delivering value to clients.`;
+  const lines = doc.splitTextToSize(narText, W - 40);
+  doc.text(lines, 20, narY + 7);
+
+  // Footer
+  doc.setFillColor(...teal);
+  doc.rect(0, H - 18, W, 18, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(10, 22, 40);
+  doc.text('Mailprotector — THE Zero Trust Email Security Company', 20, H - 9);
+  doc.text('200 N. Main Street, Suite 201, Greenville, SC 29601  ·  mailprotector.com  ·  sales@mailprotector.com', W - 20, H - 9, { align: 'right' });
+
+  doc.save(`Mailprotector-ROI-${last.mailboxes}mailboxes.pdf`);
+}
+
+// Init
+loadFromURL();
+calc();
+</script>
+
+</body>
+</html>
